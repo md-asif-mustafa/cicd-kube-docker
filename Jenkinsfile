@@ -84,7 +84,7 @@ pipeline {
 
         stage('upload Image'){
             steps {
-                srcipt {
+                script {
                     docker.withRegistry('', registryCredential) {
                         dockerImage.push("$BUILD_NUMBER")
                         dockerImage.push('latest')                        
@@ -93,16 +93,16 @@ pipeline {
             }
         }
 
-        stage('REmove Unused docker image') {
+        stage('Remove Unused docker image') {
           steps{
             sh "docker rmi $registry:V$BUILD_NUMBER"
           }
         }
 
-        steps('Kubernetes Deploy') {
+        stage('Kubernetes Deploy') {
             agent {label 'KOPS'}
               steps {
-                sh "helm upgrade --install --force aprofile-stack helm/aprofilecharts --set appimage=$(registry}:V$(BUILD_NUMBER) --namespace prod"
+                sh "helm upgrade --install --force aprofile-stack helm/aprofilecharts --set appimage=${registry}:V$(BUILD_NUMBER) --namespace prod"
               }
         }
     }
